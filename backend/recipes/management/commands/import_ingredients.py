@@ -16,7 +16,7 @@ class Command(BaseCommand):
             'r',
             encoding='utf-8'
         ) as file:
-            rows = csv.DictReader(file)
+            rows = csv.reader(file)
             for row in rows:
                 name, measurement_unit = row
                 Ingredient.objects.get_or_create(

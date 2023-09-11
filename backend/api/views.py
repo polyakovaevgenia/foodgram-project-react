@@ -1,15 +1,15 @@
 from django.db.models import Sum
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404, HttpResponse
-from rest_framework import filters, mixins, permissions, status, viewsets
+from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from .mixins import ListViewSet
 from .filters import RecipeFilter
 from recipes.models import (Favourite, Follow, Ingredient, Purchase, Recipe,
                             RecipesIngredient, Tag)
-
 from .permissions import (AuthorOrReadOnly, IsAdminIsAuthorOrReadOnly,
                           RoleAdminrOrReadOnly)
 from .serializers import (FavouriteSerializer, FollowSerializer,
@@ -50,9 +50,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_serializer_class(self):
-        if self.action in ('list', 'retrieve'):
+        if self.request.method in permissions.SAFE_METHODS:
             return RecipeSerializer
         return RecipeCreateUpdateSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
 
     @action(
         detail=True,
@@ -63,7 +66,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = get_object_or_404(Recipe, id=pk)
         if request.method == 'POST':
             serializer = FavouriteSerializer(
-                data={'user': request.user.id, 'recipe': recipe.id, },
+                data={'user': request.user.id, 'recipe': recipe.id},
                 context={'request': request}
             )
             if serializer.is_valid():
@@ -87,7 +90,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = get_object_or_404(Recipe, id=pk)
         if request.method == 'POST':
             serializer = PurchaseSerializer(
-                data={'user': request.user.id, 'recipe': recipe.id, },
+                data={'user': request.user.id, 'recipe': recipe.id},
                 context={'request': request}
             )
             if serializer.is_valid():
@@ -109,24 +112,20 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     def download_shopping_cart(self, request):
         ingredients = RecipesIngredient.objects.filter(
-            recipe__carts__user=request.user
+            recipe__purchases__user=request.user
         ).values(
             'ingredient__name', 'ingredient__measurement_unit'
-        ).annotate(ingredient_amount=Sum('count'))
+        ).annotate(amount=Sum('amount'))
         shopping_list = ['Список покупок:\n']
         for ingredient in ingredients:
             name = ingredient['ingredient__name']
             measure = ingredient['ingredient__measurement_unit']
-            count = ingredient['ingredient_count']
-            shopping_list.append(f'\n{name} - {count} {measure}')
+            amount = ingredient['amount']
+            shopping_list.append(f'\n{name} - {amount} {measure}')
         response = HttpResponse(shopping_list, content_type='text/plain')
         response['Content-Disposition'] = ('attachment;'
                                            'filename="shopping_cart.txt"')
         return response
-
-
-class ListViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    pass
 
 
 class FollowListViewSet(ListViewSet):

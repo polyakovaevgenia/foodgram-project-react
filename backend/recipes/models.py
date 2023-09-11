@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
 
 from users.models import User
@@ -8,7 +9,16 @@ class Tag(models.Model):
     """Модель Тэга."""
 
     name = models.CharField('Название', max_length=200, unique=True)
-    color = models.CharField('Цвет', max_length=50, unique=True)
+    color = models.CharField(
+        'Цвет',
+        max_length=50,
+        unique=True,
+        validators=[
+            RegexValidator(
+                regex='^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$',
+                message='Здесь может быть только HEX-код!'
+            )
+        ])
     slug = models.SlugField('Путь', unique=True)
 
     class Meta:
@@ -30,7 +40,7 @@ class Ingredient(models.Model):
         verbose_name_plural = 'Ингредиенты'
 
     def __str__(self):
-        return f'{self.name} - {self.measure}'
+        return f'{self.name} - {self.measurement_unit}'
 
 
 class Recipe(models.Model):
@@ -44,8 +54,7 @@ class Recipe(models.Model):
     )
     name = models.CharField('Название', max_length=200)
     image = models.ImageField(
-        'Картинка', upload_to='recipes/', blank=True
-    )
+        'Картинка', upload_to='recipes/')
     text = models.TextField('Текст')
     ingredients = models.ManyToManyField(
         Ingredient,
@@ -58,7 +67,12 @@ class Recipe(models.Model):
         verbose_name='Тэг',
         related_name='recipes'
     )
-    cooking_time = models.PositiveIntegerField('Время приготовления')
+    cooking_time = models.PositiveSmallIntegerField(
+        'Время приготовления',
+        validators=[MinValueValidator(
+            1,
+            message='Нельзя готовить меньше 1 минуты!')]
+    )
 
     class Meta:
         verbose_name = 'Рецепт'
@@ -84,14 +98,19 @@ class RecipesIngredient(models.Model):
         related_name='recipe_ingredients',
         verbose_name='Продукт'
     )
-    count = models.PositiveIntegerField('Количество')
+    amount = models. PositiveSmallIntegerField(
+        'Количество',
+        validators=[MinValueValidator(
+            1,
+            message='Ингредиентов не может быть меньше одного!')]
+    )
 
     class Meta:
         verbose_name = 'Ингридиент'
         verbose_name_plural = 'Ингридиенты'
 
     def __str__(self):
-        return self.ingredient.name
+        return f'{self.ingredient.name} - {self.amount}'
 
 
 class Follow(models.Model):
@@ -124,18 +143,25 @@ class Follow(models.Model):
         super(Follow, self).clean()
 
     def __str__(self):
-        return self.following
+        return f'{self.user} подписался на {self.following}'
 
 
-class Favourite(models.Model):
-    """Модель добавления рецепта в избранное."""
+class CreatedModel(models.Model):
+    """Абстрактная модель."""
 
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='usualuser',
         verbose_name='Пользователь'
     )
+
+    class Meta:
+        abstract = True
+
+
+class Favourite(CreatedModel):
+    """Модель добавления рецепта в избранное."""
+
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
@@ -153,18 +179,12 @@ class Favourite(models.Model):
         ]
 
     def __str__(self):
-        return self.recipe
+        return f'{self.user} добавил рецепт {self.recipe} в избранное'
 
 
-class Purchase(models.Model):
+class Purchase(CreatedModel):
     """Модель списка покупок."""
 
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='buyer',
-        verbose_name='Покупатель'
-    )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
@@ -181,4 +201,4 @@ class Purchase(models.Model):
         ]
 
     def __str__(self):
-        return self.recipe
+        return f'{self.user} добавил рецепт {self.recipe} в список покупок'
