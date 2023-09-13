@@ -1,20 +1,21 @@
 from django.db.models import Sum
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404, HttpResponse
-from rest_framework import filters, permissions, status, viewsets
+from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .mixins import ListViewSet
-from .filters import RecipeFilter
+from .filters import IngredientFilter, RecipeFilter
 from recipes.models import (Favourite, Follow, Ingredient, Purchase, Recipe,
                             RecipesIngredient, Tag)
 from .permissions import (AuthorOrReadOnly, IsAdminIsAuthorOrReadOnly,
                           RoleAdminrOrReadOnly)
-from .serializers import (FavouriteSerializer, FollowSerializer,
-                          FollowListSerializer, IngredientSerializer,
-                          PurchaseSerializer, RecipeCreateUpdateSerializer,
+from .serializers import (CustomUserSerializer, FavouriteSerializer,
+                          FollowSerializer, FollowListSerializer,
+                          IngredientSerializer, PurchaseSerializer,
+                          RecipeCreateUpdateSerializer,
                           RecipeSerializer, TagSerializer)
 from users.models import User
 
@@ -35,9 +36,8 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = IngredientSerializer
     permission_classes = (RoleAdminrOrReadOnly,)
     pagination_class = None
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
-    filterset_fields = ('name',)
-    search_fields = ('^name',)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = IngredientFilter
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -160,3 +160,10 @@ class FollowView(APIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         Follow.objects.get(user=request.user.id, following=user_id).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class UserListViewSet(ListViewSet):
+    """API для работы со страницей пользователя."""
+
+    serializer_class = CustomUserSerializer
+    permission_classes = (AuthorOrReadOnly,)

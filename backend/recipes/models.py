@@ -11,7 +11,7 @@ class Tag(models.Model):
     name = models.CharField('Название', max_length=200, unique=True)
     color = models.CharField(
         'Цвет',
-        max_length=50,
+        max_length=10,
         unique=True,
         validators=[
             RegexValidator(
@@ -106,8 +106,8 @@ class RecipesIngredient(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Ингридиент'
-        verbose_name_plural = 'Ингридиенты'
+        verbose_name = 'Ингредиент в рецепте'
+        verbose_name_plural = 'Ингредиенты в рецепте'
 
     def __str__(self):
         return f'{self.ingredient.name} - {self.amount}'
