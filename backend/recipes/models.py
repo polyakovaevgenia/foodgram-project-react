@@ -25,6 +25,9 @@ class Tag(models.Model):
         verbose_name = 'Тэг'
         verbose_name_plural = 'Тэги'
 
+    def clean(self):
+        self.color == self.color.upper()
+
     def __str__(self):
         return self.name
 
@@ -78,6 +81,11 @@ class Recipe(models.Model):
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
         ordering = ('-id',)
+
+    def clean(self):
+        if not self.ingredients:
+            raise ValidationError("Нельзя создать рецепт без ингредиентов")
+        super(Recipe, self).clean()
 
     def __str__(self):
         return f'{self.name} - автор {self.author}'
