@@ -19,6 +19,8 @@ class Tag(models.Model):
 
     def clean(self):
         self.color == self.color.upper()
+        if Tag.objects.filter(color=self.color.upper()).exists():
+            raise ValidationError("Этот цвет уже занят")
 
     # def clean(self):
     #     if self.color == self.color.upper():
