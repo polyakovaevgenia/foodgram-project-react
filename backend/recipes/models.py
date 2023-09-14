@@ -74,10 +74,10 @@ class Recipe(models.Model):
         verbose_name_plural = 'Рецепты'
         ordering = ('-id',)
 
-    def clean(self):
-        if not self.ingredients:
-            raise ValidationError("Нельзя создать рецепт без ингредиентов")
-        super(Recipe, self).clean()
+    # def clean(self):
+    #     if not self.ingredients:
+    #         raise ValidationError("Нельзя создать рецепт без ингредиентов")
+    #     super(Recipe, self).clean()
 
     def __str__(self):
         return f'{self.name} - автор {self.author}'
