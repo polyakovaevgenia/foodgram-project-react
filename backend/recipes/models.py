@@ -10,7 +10,7 @@ class Tag(models.Model):
     """Модель Тэга."""
 
     name = models.CharField('Название', max_length=200, unique=True)
-    color = ColorField()
+    color = ColorField('Цвет', format='hex')
     slug = models.SlugField('Путь', unique=True)
 
     class Meta:

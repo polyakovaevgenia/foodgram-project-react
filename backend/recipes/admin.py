@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.forms import BaseInlineFormSet, ValidationError
+# from django.forms import BaseInlineFormSet, ValidationError
 
 from .models import (Favourite, Follow, Ingredient, Purchase, Recipe,
                      RecipesIngredient, Tag)
@@ -12,26 +12,36 @@ class IngredientAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
 
-class IngredientInlineFormset(BaseInlineFormSet):
+# class IngredientInlineFormset(BaseInlineFormSet):
 
-    def is_valid(self):
-        return (super(IngredientInlineFormset, self)
-                .is_valid()
-                and not any([bool(error) for error in self.errors]))
+#     def is_valid(self):
+#         return (super(IngredientInlineFormset, self)
+#                 .is_valid()
+#                 and not any([bool(error) for error in self.errors]))
 
-    def clean(self):
-        count = 0
-        for form in self.forms:
-            try:
-                if (
-                    form.cleaned_data
-                    and not form.cleaned_data.get('DELETE', False)
-                ):
-                    count += 1
-            except AttributeError:
-                pass
-        if count < 1:
-            raise ValidationError("Добавьте тэги и ингредиенты")
+#     def clean(self):
+#         count = 0
+#         for form in self.forms:
+#             try:
+#                 if (
+#                     form.cleaned_data
+#                     and not form.cleaned_data.get('DELETE', False)
+#                 ):
+#                     count += 1
+#             except AttributeError:
+#                 pass
+#         if count < 1:
+#             raise ValidationError("Добавьте тэги и ингредиенты")
+
+
+class IngredientInline(admin.TabularInline):
+    model = RecipesIngredient
+    extra = 0
+
+
+class TagInline(admin.TabularInline):
+    model = Tag
+    extra = 0
 
 
 class RecipeAdmin(admin.ModelAdmin):
@@ -40,7 +50,7 @@ class RecipeAdmin(admin.ModelAdmin):
     search_fields = ('name', 'author')
     list_filter = ('name', 'author', 'tags')
     empty_value_display = '-пусто-'
-    inlines = [IngredientInlineFormset]
+    inlines = (IngredientInline, TagInline,)
 
     def favourites_count(self, obj):
         return Favourite.objects.filter(recipe=obj).count()
