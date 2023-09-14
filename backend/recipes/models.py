@@ -17,8 +17,13 @@ class Tag(models.Model):
         verbose_name = 'Тэг'
         verbose_name_plural = 'Тэги'
 
+    # def clean(self):
+    #     self.color == self.color.upper()
+
     def clean(self):
-        self.color == self.color.upper()
+        if self.color == self.color.upper():
+            raise ValidationError("Этот цвет уже занят")
+        super(Tag, self).clean()
 
     def __str__(self):
         return self.name
