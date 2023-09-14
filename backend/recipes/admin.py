@@ -39,9 +39,9 @@ class IngredientInline(admin.TabularInline):
     extra = 0
 
 
-class TagInline(admin.TabularInline):
-    model = Tag
-    extra = 0
+# class TagInline(admin.TabularInline):
+#     model = Tag
+#     extra = 0
 
 
 class RecipeAdmin(admin.ModelAdmin):
@@ -50,7 +50,7 @@ class RecipeAdmin(admin.ModelAdmin):
     search_fields = ('name', 'author')
     list_filter = ('name', 'author', 'tags')
     empty_value_display = '-пусто-'
-    inlines = (IngredientInline, TagInline,)
+    inlines = (IngredientInline,)
 
     def favourites_count(self, obj):
         return Favourite.objects.filter(recipe=obj).count()
