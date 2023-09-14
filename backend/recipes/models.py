@@ -1,5 +1,6 @@
+from colorfield.fields import ColorField
 from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator, RegexValidator
+from django.core.validators import MinValueValidator
 from django.db import models
 
 from users.models import User
@@ -9,16 +10,7 @@ class Tag(models.Model):
     """Модель Тэга."""
 
     name = models.CharField('Название', max_length=200, unique=True)
-    color = models.CharField(
-        'Цвет',
-        max_length=10,
-        unique=True,
-        validators=[
-            RegexValidator(
-                regex='^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$',
-                message='Здесь может быть только HEX-код!'
-            )
-        ])
+    color = ColorField()
     slug = models.SlugField('Путь', unique=True)
 
     class Meta:

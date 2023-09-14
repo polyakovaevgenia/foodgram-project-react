@@ -45,17 +45,22 @@ class TagSerializer(serializers.ModelSerializer):
         model = Tag
         fields = ('name', 'color', 'slug', 'id', 'recipes')
 
-    def validate_color(self, data):
-        color = data.get('color')
-        validate_color = color.strip('#').upper()
-        if Tag.objects.filter(color=color).exists():
-            raise serializers.ValidationError("Этот цвет уже занят.")
-        Tag.objects.get_or_create(
-            name=data['name'],
-            color=validate_color,
-            slug=data['slug'],
-        )
-        return data
+    # def validate_color(self, data):
+    #     color = data.get('color')
+    #     validate_color = color.strip('#').upper()
+    #     if Tag.objects.filter(color=color).exists():
+    #         raise serializers.ValidationError("Этот цвет уже занят.")
+    #     Tag.objects.get_or_create(
+    #         name=data['name'],
+    #         color=validate_color,
+    #         slug=data['slug'],
+    #     )
+    #     return data
+
+    # def validate_color(self, value):
+    #     if Tag.objects.filter(color=self.request.color).exists():
+    #         raise serializers.ValidationError("Этот цвет уже занят")
+    #     return value
 
 
 class IngredientSerializer(serializers.ModelSerializer):
