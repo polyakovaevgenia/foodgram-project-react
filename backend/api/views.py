@@ -177,10 +177,10 @@ class UserListViewSet(ListViewSet):
         methods=['post', 'delete'],
         permission_classes=[permissions.IsAuthenticated, ]
     )
-    def subscribe(self, request, **kwargs):
+    def subscribe(self, request, pk):
         # user = request.user
-        following_id = self.kwargs.get('id')
-        following = get_object_or_404(User, id=following_id)
+        # following_id = self.kwargs.get('id')
+        following = get_object_or_404(User, id=pk)
         if request.method == 'POST':
             serializer = FollowSerializer(
                 data={'user': request.user.id, 'following': following.id},
@@ -195,8 +195,8 @@ class UserListViewSet(ListViewSet):
         if not Follow.objects.filter(user=request.user,
                                      following=following).exists():
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        Follow.objects.get(user=request.user.id,
-                           following=following_id).delete()
+        Follow.objects.get(user=request.user,
+                           following=following).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
