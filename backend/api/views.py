@@ -178,7 +178,7 @@ class UserListViewSet(ListViewSet):
         permission_classes=[permissions.IsAuthenticated, ]
     )
     def subscribe(self, request, user_id):
-        following = get_object_or_404(User, id=user_id)
+        following = get_object_or_404(User, pk=user_id)
         if request.method == 'POST':
             serializer = FollowSerializer(
                 data={'user': request.user.id, 'following': following.id},
