@@ -25,7 +25,7 @@ class CustomUserSerializer(UserSerializer):
         user = self.context.get('request').user
         if not user.is_authenticated:
             return False
-        return Follow.objects.filter(user=user, following=obj).exists()
+        return Follow.objects.filter(user=user, following__id=obj.id).exists()
 
 
 class Base64ImageField(serializers.ImageField):
