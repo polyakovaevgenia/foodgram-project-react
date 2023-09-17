@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404, HttpResponse
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.views import APIView
+# from rest_framework.views import APIView
 
 from .mixins import ListViewSet
 from .filters import IngredientFilter, RecipeFilter
@@ -128,46 +128,83 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return response
 
 
-class FollowListViewSet(ListViewSet):
-    """API для работы со списком подписок."""
+# class FollowListViewSet(ListViewSet):
+#     """API для работы со списком подписок."""
 
-    serializer_class = FollowListSerializer
-    permission_classes = (AuthorOrReadOnly,)
+#     serializer_class = FollowListSerializer
+#     permission_classes = (AuthorOrReadOnly,)
 
-    def get_queryset(self):
-        return User.objects.filter(following__user=self.request.user)
-
-
-class FollowView(APIView):
-    """API для модели Подписок."""
-
-    queryset = User.objects.all()
-    serializer_class = CustomUserSerializer
-
-    def post(self, request, user_id):
-        following = get_object_or_404(User, id=user_id)
-        serializer = FollowSerializer(
-            data={'user': request.user.id, 'following': following.id},
-            context={'request': request}
-        )
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors,
-                        status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, user_id):
-        following = get_object_or_404(User, id=user_id)
-        if not Follow.objects.filter(user=request.user,
-                                     following=following).exists():
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        Follow.objects.get(user=request.user.id, following=user_id).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+#     def get_queryset(self):
+#         return User.objects.filter(following__user=self.request.user)
 
 
-# class UserListViewSet(ListViewSet):
-#     """API для работы со страницей пользователя."""
+# class FollowView(APIView):
+#     """API для модели Подписок."""
 
 #     queryset = User.objects.all()
 #     serializer_class = CustomUserSerializer
-#     permission_classes = (AuthorOrReadOnly,)
+
+#     def post(self, request, user_id):
+#         following = get_object_or_404(User, id=user_id)
+#         serializer = FollowSerializer(
+#             data={'user': request.user.id, 'following': following.id},
+#             context={'request': request}
+#         )
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors,
+#                         status=status.HTTP_400_BAD_REQUEST)
+
+#     def delete(self, request, user_id):
+#         following = get_object_or_404(User, id=user_id)
+#         if not Follow.objects.filter(user=request.user,
+#                                      following=following).exists():
+#             return Response(status=status.HTTP_400_BAD_REQUEST)
+#         Follow.objects.get(user=request.user.id, following=user_id).delete()
+#         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class UserListViewSet(ListViewSet):
+    """API для работы со страницей пользователя."""
+
+    queryset = User.objects.all()
+    serializer_class = CustomUserSerializer
+    permission_classes = (AuthorOrReadOnly,)
+
+    @action(
+        detail=True,
+        methods=['post', 'delete'],
+        permission_classes=[permissions.IsAuthenticated, ]
+    )
+    def subscribe(self, request, user_id):
+        following = get_object_or_404(User, id=user_id)
+        if request.method == 'POST':
+            serializer = FollowSerializer(
+                data={'user': request.user.id, 'following': following.id},
+                context={'request': request}
+            )
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data,
+                                status=status.HTTP_201_CREATED)
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
+        if not Follow.objects.filter(user=request.user,
+                                     following=following).exists():
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        Follow.objects.get(user=request.user.id,
+                           following=user_id).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(
+        detail=False,
+        permission_classes=[permissions.IsAuthenticated, ]
+    )
+    def subscriptions(self, request):
+        queryset = User.objects.filter(following__user=self.request.user)
+        pages = self.paginate_queryset(queryset)
+        serializer = FollowListSerializer(pages,
+                                          many=True,
+                                          context={'request': request})
+        return self.get_paginated_response(serializer.data)
