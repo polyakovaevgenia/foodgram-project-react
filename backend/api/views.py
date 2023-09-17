@@ -12,7 +12,7 @@ from recipes.models import (Favourite, Follow, Ingredient, Purchase, Recipe,
                             RecipesIngredient, Tag)
 from .permissions import (AuthorOrReadOnly, IsAdminIsAuthorOrReadOnly,
                           RoleAdminrOrReadOnly)
-from .serializers import (CustomUserSerializer, FavouriteSerializer,
+from .serializers import (FavouriteSerializer,
                           FollowSerializer, FollowListSerializer,
                           IngredientSerializer, PurchaseSerializer,
                           RecipeCreateUpdateSerializer,
@@ -162,9 +162,9 @@ class FollowView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class UserListViewSet(ListViewSet):
-    """API для работы со страницей пользователя."""
+# class UserListViewSet(ListViewSet):
+#     """API для работы со страницей пользователя."""
 
-    queryset = User.objects.all()
-    serializer_class = CustomUserSerializer
-    permission_classes = (AuthorOrReadOnly,)
+#     queryset = User.objects.all()
+#     serializer_class = CustomUserSerializer
+#     permission_classes = (AuthorOrReadOnly,)
