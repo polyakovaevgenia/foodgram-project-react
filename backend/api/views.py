@@ -12,7 +12,7 @@ from recipes.models import (Favourite, Follow, Ingredient, Purchase, Recipe,
                             RecipesIngredient, Tag)
 from .permissions import (AuthorOrReadOnly, IsAdminIsAuthorOrReadOnly,
                           RoleAdminrOrReadOnly)
-from .serializers import (FavouriteSerializer,
+from .serializers import (CustomUserSerializer, FavouriteSerializer,
                           FollowSerializer, FollowListSerializer,
                           IngredientSerializer, PurchaseSerializer,
                           RecipeCreateUpdateSerializer,
@@ -140,6 +140,9 @@ class FollowListViewSet(ListViewSet):
 
 class FollowView(APIView):
     """API для модели Подписок."""
+
+    queryset = User.objects.all()
+    serializer_class = CustomUserSerializer
 
     def post(self, request, user_id):
         following = get_object_or_404(User, id=user_id)
