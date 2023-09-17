@@ -21,11 +21,18 @@ class CustomUserSerializer(UserSerializer):
         fields = ('id', 'username', 'email', 'first_name', 'last_name',
                   'is_subscribed')
 
+    # def get_is_subscribed(self, obj):
+    #     user = self.context.get('request').user
+    #     if not user.is_authenticated:
+    #         return False
+#     return Follow.objects.filter(user=user, following__id=obj.id).exists()
+
     def get_is_subscribed(self, obj):
-        user = self.context.get('request').user
-        if not user.is_authenticated:
-            return False
-        return Follow.objects.filter(user=user, following__id=obj.id).exists()
+        request = self.context.get('request')
+        return (request and request.user.is_authenticated
+                and Follow.objects.filter(
+                    user=request.user, following=obj
+                ).exists())
 
 
 class Base64ImageField(serializers.ImageField):
