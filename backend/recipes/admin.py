@@ -1,4 +1,6 @@
 from django.contrib import admin
+# from django.forms import BaseInlineFormSet
+# from rest_framework import serializers
 
 from .models import (Favourite, Follow, Ingredient, Purchase, Recipe,
                      RecipesIngredient, Tag)
@@ -16,6 +18,32 @@ class IngredientInline(admin.TabularInline):
     extra = 1
     min_num = 1
 
+    def get_formset(self, request, obj=None, **kwargs):
+        formset = super().get_formset(request, obj=None, **kwargs)
+        formset.validate_min = True
+        return formset
+
+# class IngredientInlineFormSet(BaseInlineFormSet):
+
+#     def is_valid(self):
+#         return (super(IngredientInlineFormset, self).is_valid()
+#                 and not any([bool(error) for error in self.errors]))
+
+#     def clean(self):
+#         count = 0
+#         for form in self.forms:
+#             try:
+#                 if (
+#                     form.cleaned_data
+#                     and not form.cleaned_data.get('DELETE', False)
+#                 ):
+#                     count += 1
+#             except AttributeError:
+#                 pass
+#         if count < 1:
+#             raise serializers.ValidationError("В рецепте должны быть"
+#                                               "теги и ингредиенты")
+
 
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ('pk', 'name', 'author', 'favourites_count')
@@ -24,6 +52,7 @@ class RecipeAdmin(admin.ModelAdmin):
     list_filter = ('name', 'author', 'tags')
     empty_value_display = '-пусто-'
     inlines = (IngredientInline,)
+    # formset =
 
     def favourites_count(self, obj):
         return Favourite.objects.filter(recipe=obj).count()

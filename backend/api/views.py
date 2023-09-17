@@ -165,5 +165,6 @@ class FollowView(APIView):
 class UserListViewSet(ListViewSet):
     """API для работы со страницей пользователя."""
 
+    queryset = User.objects.all()
     serializer_class = CustomUserSerializer
     permission_classes = (AuthorOrReadOnly,)

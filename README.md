@@ -125,7 +125,7 @@ api/ingredients/
 python manage.py import_ingredients 
 ``` 
 
-### Докуметация для API YaMDb:
+### Докуметация для API:
 
 Запустите проект и перейдите по адресу: 
 
