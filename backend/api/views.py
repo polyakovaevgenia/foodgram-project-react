@@ -13,7 +13,7 @@ from recipes.models import (Favourite, Follow, Ingredient, Purchase, Recipe,
 from .permissions import (AuthorOrReadOnly, IsAdminIsAuthorOrReadOnly,
                           RoleAdminrOrReadOnly)
 from .serializers import (CustomUserSerializer, FavouriteSerializer,
-                          FollowSerializer, FollowListSerializer,
+                          FollowListSerializer,
                           IngredientSerializer, PurchaseSerializer,
                           RecipeCreateUpdateSerializer,
                           RecipeSerializer, TagSerializer)
@@ -182,16 +182,16 @@ class UserListViewSet(ListViewSet):
         # following_id = self.kwargs.get('id')
         following = get_object_or_404(User, id=pk)
         if request.method == 'POST':
-            serializer = FollowSerializer(
+            serializer = FollowListSerializer(
                 data={'user': request.user.id, 'following': following.id},
                 context={'request': request}
             )
             if serializer.is_valid():
                 serializer.save()
-                following_serializer = FollowListSerializer(
-                    following, context={'request': request}
-                )
-                return Response(following_serializer.data,
+                # following_serializer = FollowListSerializer(
+                #     following, context={'request': request}
+                # )
+                return Response(serializer.data,
                                 status=status.HTTP_201_CREATED)
             return Response(serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST)
