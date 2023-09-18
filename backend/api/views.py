@@ -128,43 +128,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return response
 
 
-# class FollowListViewSet(ListViewSet):
-#     """API для работы со списком подписок."""
-
-#     serializer_class = FollowListSerializer
-#     permission_classes = (AuthorOrReadOnly,)
-
-#     def get_queryset(self):
-#         return User.objects.filter(following__user=self.request.user)
-
-
-# class FollowView(APIView):
-#     """API для модели Подписок."""
-
-#     queryset = User.objects.all()
-#     serializer_class = CustomUserSerializer
-
-#     def post(self, request, user_id):
-#         following = get_object_or_404(User, id=user_id)
-#         serializer = FollowSerializer(
-#             data={'user': request.user.id, 'following': following.id},
-#             context={'request': request}
-#         )
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors,
-#                         status=status.HTTP_400_BAD_REQUEST)
-
-#     def delete(self, request, user_id):
-#         following = get_object_or_404(User, id=user_id)
-#         if not Follow.objects.filter(user=request.user,
-#                                      following=following).exists():
-#             return Response(status=status.HTTP_400_BAD_REQUEST)
-#         Follow.objects.get(user=request.user.id, following=user_id).delete()
-#         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
 class UserListViewSet(ListViewSet):
     """API для работы со страницей пользователя."""
 
@@ -178,8 +141,6 @@ class UserListViewSet(ListViewSet):
         permission_classes=[permissions.IsAuthenticated, ]
     )
     def subscribe(self, request, pk):
-        # user = request.user
-        # following_id = self.kwargs.get('id')
         following = get_object_or_404(User, id=pk)
         if request.method == 'POST':
             serializer = FollowSerializer(

@@ -18,8 +18,9 @@ class Tag(models.Model):
         verbose_name_plural = 'Тэги'
 
     def clean(self):
-        if Tag.objects.filter(color=self.color.upper()).exists():
-            raise ValidationError("Этот цвет уже занят")
+        if self.color == self.color.upper():
+            raise ValidationError("Задайте уникальный цвет")
+        super(Tag, self).clean()
 
     def __str__(self):
         return self.name

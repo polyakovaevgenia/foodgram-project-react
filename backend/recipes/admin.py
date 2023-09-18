@@ -1,6 +1,4 @@
 from django.contrib import admin
-# from django.forms import BaseInlineFormSet
-# from rest_framework import serializers
 
 from .models import (Favourite, Follow, Ingredient, Purchase, Recipe,
                      RecipesIngredient, Tag)

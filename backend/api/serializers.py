@@ -21,12 +21,6 @@ class CustomUserSerializer(UserSerializer):
         fields = ('id', 'username', 'email', 'first_name', 'last_name',
                   'is_subscribed')
 
-    # def get_is_subscribed(self, obj):
-    #     user = self.context.get('request').user
-    #     if not user.is_authenticated:
-    #         return False
-#     return Follow.objects.filter(user=user, following__id=obj.id).exists()
-
     def get_is_subscribed(self, obj):
         request = self.context.get('request')
         return (request and request.user.is_authenticated
@@ -52,22 +46,17 @@ class TagSerializer(serializers.ModelSerializer):
         model = Tag
         fields = ('name', 'color', 'slug', 'id', 'recipes')
 
-    # def validate_color(self, data):
-    #     color = data.get('color')
-    #     validate_color = color.strip('#').upper()
-    #     if Tag.objects.filter(color=color).exists():
-    #         raise serializers.ValidationError("Этот цвет уже занят.")
-    #     Tag.objects.get_or_create(
-    #         name=data['name'],
-    #         color=validate_color,
-    #         slug=data['slug'],
-    #     )
-    #     return data
-
-    # def validate_color(self, value):
-    #     if Tag.objects.filter(color=self.request.color).exists():
-    #         raise serializers.ValidationError("Этот цвет уже занят")
-    #     return value
+    def validate_color(self, data):
+        color = data.get('color')
+        validate_color = color.strip('#').upper()
+        if Tag.objects.filter(color=color).exists():
+            raise serializers.ValidationError("Этот цвет уже есть в базе.")
+        Tag.objects.get_or_create(
+            name=data['name'],
+            color=validate_color,
+            slug=data['slug'],
+        )
+        return data
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -262,7 +251,6 @@ class FollowListSerializer(CustomUserSerializer):
 
     recipes = serializers.SerializerMethodField(read_only=True)
     recipes_count = serializers.SerializerMethodField(read_only=True)
-    # is_subscribed = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = User
@@ -284,22 +272,6 @@ class FollowListSerializer(CustomUserSerializer):
 
     def get_recipes_count(self, obj):
         return obj.recipes.count()
-
-    # def get_is_subscribed(self, obj):
-    #     return True
-
-    # def validate(self, data):
-    #     following = self.instance
-    #     user = self.context.get('request').user
-    #     if Follow().objects.filter(following=following, user=user).exists():
-    #         raise serializers.ValidationError(
-    #             "Вы уже подписаны на этого пользователя"
-    #         )
-    #     if user == following:
-    #         raise serializers.ValidationError(
-    #             "Нельзя подписаться на себя"
-    #         )
-    #     return data
 
 
 class RecipeFollowSerializer(serializers.ModelSerializer):
