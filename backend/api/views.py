@@ -188,9 +188,6 @@ class UserListViewSet(ListViewSet):
             )
             if serializer.is_valid():
                 serializer.save()
-                # following_serializer = FollowListSerializer(
-                #     following, context={'request': request}
-                # )
                 return Response(serializer.data,
                                 status=status.HTTP_201_CREATED)
             return Response(serializer.errors,
