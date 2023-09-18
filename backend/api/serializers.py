@@ -163,6 +163,12 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = ('name', 'text', 'tags', 'cooking_time', 'image',
                   'ingredients', 'id', 'author')
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Favourite.objects.all(),
+                fields=('name', 'author')
+            )
+        ]
 
     def validate_cooking_time(self, value):
         cooking_time = value
@@ -234,23 +240,30 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
                                 context={'request': request}).data
 
 
-# class FollowSerializer(serializers.ModelSerializer):
-#     """Сериалайзер для модели Подписок."""
+class FollowSerializer(serializers.ModelSerializer):
+    """Сериалайзер для модели Подписок."""
 
-#     class Meta:
-#         model = Follow
-#         fields = ('user', 'following')
-#         validators = [
-#             UniqueTogetherValidator(
-#                 queryset=Follow.objects.all(),
-#                 fields=('user', 'following')
-#             )
-#         ]
+    class Meta:
+        model = Follow
+        fields = ('user', 'following')
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Follow.objects.all(),
+                fields=('user', 'following')
+            )
+        ]
 
-#     def validate_following(self, value):
-#         if self.context['request'].user != value:
-#             return value
-#         raise serializers.ValidationError("Нельзя подписаться на себя")
+    def validate_following(self, value):
+        if self.context['request'].user != value:
+            return value
+        raise serializers.ValidationError("Нельзя подписаться на себя")
+
+    def to_representation(self, instance):
+        request = self.context.get('request')
+        return FollowListSerializer(
+            instance.following,
+            context={'request': request}
+        ).data
 
 
 class FollowListSerializer(CustomUserSerializer):
@@ -258,7 +271,7 @@ class FollowListSerializer(CustomUserSerializer):
 
     recipes = serializers.SerializerMethodField(read_only=True)
     recipes_count = serializers.SerializerMethodField(read_only=True)
-    # is_subscribed = serializers.SerializerMethodField(read_only=True)
+    is_subscribed = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = User
@@ -284,18 +297,18 @@ class FollowListSerializer(CustomUserSerializer):
     # def get_is_subscribed(self, obj):
     #     return True
 
-    def validate(self, data):
-        following = self.instance
-        user = self.context.get('request').user
-        if Follow().objects.filter(following=following, user=user).exists():
-            raise serializers.ValidationError(
-                "Вы уже подписаны на этого пользователя"
-            )
-        if user == following:
-            raise serializers.ValidationError(
-                "Нельзя подписаться на себя"
-            )
-        return data
+    # def validate(self, data):
+    #     following = self.instance
+    #     user = self.context.get('request').user
+    #     if Follow().objects.filter(following=following, user=user).exists():
+    #         raise serializers.ValidationError(
+    #             "Вы уже подписаны на этого пользователя"
+    #         )
+    #     if user == following:
+    #         raise serializers.ValidationError(
+    #             "Нельзя подписаться на себя"
+    #         )
+    #     return data
 
 
 class RecipeFollowSerializer(serializers.ModelSerializer):

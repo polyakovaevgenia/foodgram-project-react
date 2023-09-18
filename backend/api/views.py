@@ -13,7 +13,7 @@ from recipes.models import (Favourite, Follow, Ingredient, Purchase, Recipe,
 from .permissions import (AuthorOrReadOnly, IsAdminIsAuthorOrReadOnly,
                           RoleAdminrOrReadOnly)
 from .serializers import (CustomUserSerializer, FavouriteSerializer,
-                          FollowListSerializer,
+                          FollowSerializer, FollowListSerializer,
                           IngredientSerializer, PurchaseSerializer,
                           RecipeCreateUpdateSerializer,
                           RecipeSerializer, TagSerializer)
@@ -182,7 +182,7 @@ class UserListViewSet(ListViewSet):
         # following_id = self.kwargs.get('id')
         following = get_object_or_404(User, id=pk)
         if request.method == 'POST':
-            serializer = FollowListSerializer(
+            serializer = FollowSerializer(
                 data={'user': request.user.id, 'following': following.id},
                 context={'request': request}
             )
