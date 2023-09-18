@@ -13,21 +13,21 @@ class IngredientAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
 
-class MinValidatedInlineMixIn:
-    validate_min = True
+# class MinValidatedInlineMixIn:
+#     validate_min = True
 
-    def get_formset(self, *args, **kwargs):
-        return super().get_formset(
-            validate_min=self.validate_min,
-            *args,
-            **kwargs)
+#     def get_formset(self, *args, **kwargs):
+#         return super().get_formset(
+#             validate_min=self.validate_min,
+#             *args,
+#             **kwargs)
 
 
-class IngredientInline(MinValidatedInlineMixIn, admin.TabularInline):
-    model = RecipesIngredient
-    extra = 1
-    min_num = 1
-    validate_min = True
+# class IngredientInline(MinValidatedInlineMixIn, admin.TabularInline):
+#     model = RecipesIngredient
+#     extra = 1
+#     min_num = 1
+#     validate_min = True
 
     # def get_formset(self, request, obj=None, **kwargs):
     #     formset = super().get_formset(request, obj=None, **kwargs)
@@ -63,7 +63,7 @@ class RecipeAdmin(admin.ModelAdmin):
     search_fields = ('name', 'author')
     list_filter = ('name', 'author', 'tags')
     empty_value_display = '-пусто-'
-    inlines = (IngredientInline,)
+    # inlines = (IngredientInline,)
     # formset =
 
     def favourites_count(self, obj):
