@@ -280,11 +280,7 @@ class FollowListSerializer(CustomUserSerializer):
         return obj.recipes.count()
 
     def get_is_subscribed(self, obj):
-        request = self.context.get('request')
-        return (request and request.user.is_authenticated
-                and Follow.objects.filter(
-                    user=request.user, following=obj
-                ).exists())
+        return True
 
 
 class RecipeFollowSerializer(serializers.ModelSerializer):
