@@ -109,9 +109,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     author = CustomUserSerializer(read_only=True)
     tags = TagSerializer(many=True, read_only=True)
-    ingredients = IngredientListSerializer(
-        many=True,
-        read_only=True)
+    ingredients = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
     image = Base64ImageField(required=False, allow_null=True)
@@ -130,6 +128,10 @@ class RecipeSerializer(serializers.ModelSerializer):
     #         amount=F('ingredientinrecipe__amount')
     #     )
     #     return ingredients
+
+    def get_ingredients(self, obj):
+        ingredients = RecipesIngredient.objects.filter(recipe=obj)
+        return IngredientListSerializer(ingredients, many=True).data
 
     def get_is_favorited(self, obj):
         request = self.context.get('request')
@@ -256,7 +258,7 @@ class FollowListSerializer(CustomUserSerializer):
 
     recipes = serializers.SerializerMethodField(read_only=True)
     recipes_count = serializers.SerializerMethodField(read_only=True)
-    is_subscribed = serializers.SerializerMethodField(read_only=True)
+    # is_subscribed = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = User
@@ -279,8 +281,8 @@ class FollowListSerializer(CustomUserSerializer):
     def get_recipes_count(self, obj):
         return obj.recipes.count()
 
-    def get_is_subscribed(self, obj):
-        return True
+    # def get_is_subscribed(self, obj):
+    #     return True
 
 
 class RecipeFollowSerializer(serializers.ModelSerializer):

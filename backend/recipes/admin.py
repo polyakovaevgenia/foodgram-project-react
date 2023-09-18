@@ -18,10 +18,11 @@ class IngredientInline(admin.TabularInline):
     extra = 1
     min_num = 1
 
-    def get_formset(self, request, obj=None, **kwargs):
-        formset = super().get_formset(request, obj=None, **kwargs)
-        formset.validate_min = True
-        return formset
+    # def get_formset(self, request, obj=None, **kwargs):
+    #     formset = super().get_formset(request, obj=None, **kwargs)
+    #     formset.validate_min = True
+    #     return formset
+    # get_formset(), request)
 
 # class IngredientInlineFormSet(BaseInlineFormSet):
 
