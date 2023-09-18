@@ -166,7 +166,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         validators = [
             UniqueTogetherValidator(
                 queryset=Recipe.objects.all(),
-                fields=('name', 'author')
+                fields=('name', 'text')
             )
         ]
 

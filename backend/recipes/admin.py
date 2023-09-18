@@ -13,10 +13,21 @@ class IngredientAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
 
-class IngredientInline(admin.TabularInline):
+class MinValidatedInlineMixIn:
+    validate_min = True
+
+    def get_formset(self, *args, **kwargs):
+        return super().get_formset(
+            validate_min=self.validate_min,
+            *args,
+            **kwargs)
+
+
+class IngredientInline(MinValidatedInlineMixIn, admin.TabularInline):
     model = RecipesIngredient
     extra = 1
     min_num = 1
+    validate_min = True
 
     # def get_formset(self, request, obj=None, **kwargs):
     #     formset = super().get_formset(request, obj=None, **kwargs)
